@@ -28,11 +28,10 @@ def get_url(driver):
         if i == len(list_class) - 1:
             print("Class not found")
     input_game = input("Enter game (wotlk, tbc): ")
+    driver.get("https://wotlkdb.com/?locale=0")
     if input_game == "wotlk":
-        driver.get("https://wotlkdb.com/?locale=0")
         url = "https://wotlkdb.com/?spells=7." + str(id)
     elif input_game == "tbc":
-        driver.get("https://tbcdb.com/?locale=0")
         url = "https://tbcdb.com/?spells=7." + str(id)
     return url
 
@@ -60,6 +59,8 @@ def get_spell_list(driver, max_elements, url):
             td_elements = tr_elements[i].find_elements_by_tag_name("td")
             if i > 0:
                 skill_name = td_elements[1].find_elements_by_tag_name("a")[0].text
+                if "Passive" in skill_name:
+                    continue
                 skill_name_rank = td_elements[1].find_elements_by_tag_name("div")[0].text
                 buffer = filter(str.isdigit, skill_name_rank)
                 skill_rank = "".join(buffer)
@@ -73,10 +74,10 @@ def get_spell_list(driver, max_elements, url):
 
 def print_results(list):
     for i in range(len(list)):
-        print('private string ' + list[i][0].replace(" ", "") + ' = "' + list[i][0] + '";')
+        print('private string ' + ''.join(e for e in list[i][0] if e.isalnum() or e == " ").replace(" ", "") + ' = "' + list[i][0] + '";')
     print("\n")
     for i in range(len(list)):
-        print('AddSpell(' + list[i][0].replace(" ", "") + ', ' + list[i][1] + ', "None");')
+        print('AddSpell(' + ''.join(e for e in list[i][0] if e.isalnum() or e == " ").replace(" ", "") + ', ' + list[i][1] + ', "None");')
 
 driver = get_driver()
 url = get_url(driver)
@@ -84,3 +85,5 @@ max_elements = get_max_elements(driver, url)
 spell_list = get_spell_list(driver, max_elements, url)
 print_results(spell_list)
 driver.quit()
+
+#todo add specs choice
